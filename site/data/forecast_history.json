@@ -1,54 +1,5 @@
 [
   {
-    "target_timestamp_utc": "2026-08-25T09:30:00Z",
-    "ap30": 2.8,
-    "lower": 1.5,
-    "upper": 4.0,
-    "status": "ok"
-  },
-  {
-    "target_timestamp_utc": "2026-08-25T10:00:00Z",
-    "ap30": 2.7,
-    "lower": 1.5,
-    "upper": 4.0,
-    "status": "ok"
-  },
-  {
-    "target_timestamp_utc": "2026-08-25T10:30:00Z",
-    "ap30": 2.5,
-    "lower": 1.2,
-    "upper": 4.1,
-    "status": "ok"
-  },
-  {
-    "target_timestamp_utc": "2026-08-25T11:00:00Z",
-    "ap30": 2.6,
-    "lower": 1.4,
-    "upper": 3.7,
-    "status": "ok"
-  },
-  {
-    "target_timestamp_utc": "2026-08-25T11:30:00Z",
-    "ap30": 2.3,
-    "lower": 1.2,
-    "upper": 3.4,
-    "status": "ok"
-  },
-  {
-    "target_timestamp_utc": "2026-08-25T12:00:00Z",
-    "ap30": 1.7,
-    "lower": 0.6,
-    "upper": 3.0,
-    "status": "ok"
-  },
-  {
-    "target_timestamp_utc": "2026-08-25T12:30:00Z",
-    "ap30": 1.9,
-    "lower": 0.9,
-    "upper": 2.9,
-    "status": "ok"
-  },
-  {
     "target_timestamp_utc": "2026-08-25T13:00:00Z",
     "ap30": 0.9,
     "lower": 0.1,
@@ -676,6 +627,55 @@
     "ap30": 1.6,
     "lower": 0.7,
     "upper": 2.6,
+    "status": "ok"
+  },
+  {
+    "target_timestamp_utc": "2026-08-27T10:00:00Z",
+    "ap30": 0,
+    "lower": 0,
+    "upper": 0,
+    "status": null
+  },
+  {
+    "target_timestamp_utc": "2026-08-27T10:30:00Z",
+    "ap30": 0,
+    "lower": 0,
+    "upper": 0,
+    "status": null
+  },
+  {
+    "target_timestamp_utc": "2026-08-27T11:00:00Z",
+    "ap30": 0,
+    "lower": 0,
+    "upper": 0,
+    "status": null
+  },
+  {
+    "target_timestamp_utc": "2026-08-27T11:30:00Z",
+    "ap30": 0,
+    "lower": 0,
+    "upper": 0,
+    "status": null
+  },
+  {
+    "target_timestamp_utc": "2026-08-27T12:00:00Z",
+    "ap30": 0,
+    "lower": 0,
+    "upper": 0,
+    "status": null
+  },
+  {
+    "target_timestamp_utc": "2026-08-27T12:30:00Z",
+    "ap30": 0,
+    "lower": 0,
+    "upper": 0,
+    "status": null
+  },
+  {
+    "target_timestamp_utc": "2026-08-27T13:00:00Z",
+    "ap30": 2.8,
+    "lower": 1.4,
+    "upper": 4.4,
     "status": "ok"
   }
 ]
