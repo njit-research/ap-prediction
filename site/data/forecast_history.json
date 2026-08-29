@@ -673,9 +673,9 @@
   },
   {
     "target_timestamp_utc": "2026-08-29T04:00:00Z",
-    "ap30": 29.4,
-    "lower": 19.9,
-    "upper": 38.8,
+    "ap30": 26.0,
+    "lower": 17.3,
+    "upper": 34.2,
     "status": "ok"
   }
 ]
