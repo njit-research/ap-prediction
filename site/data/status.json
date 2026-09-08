@@ -1,9 +1,6 @@
 {
-  "status": "warn",
-  "last_success_utc": "2026-09-08T21:30:54Z",
-  "last_attempt_utc": "2026-09-08T21:41:15Z",
-  "last_error": {
-    "code": 2,
-    "message": "Upstream feed unreachable — waiting for next cycle."
-  }
+  "status": "ok",
+  "last_success_utc": "2026-09-08T21:50:33Z",
+  "last_attempt_utc": "2026-09-08T21:50:33Z",
+  "last_error": null
 }
