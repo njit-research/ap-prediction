@@ -1,6 +1,7 @@
 /* Render the latest ap30 forecast. Fetches site/data/latest.json and
  * site/data/status.json, fills the metadata block, paints the status banner,
- * and draws a Chart.js line plot of the 24-step forecast.
+ * and draws a Chart.js line plot of the 12-step (6-hour) forecast with its
+ * 95% prediction interval (analysis.mcd.lower/upper).
  */
 (async () => {
   const LATEST_URL = "./data/latest.json";
@@ -103,8 +104,9 @@
 
   const anchorMs = new Date(latest.anchor_timestamp_utc).getTime();
 
-  // MCD uncertainty band. The realtime pipeline writes parallel arrays under
-  // analysis.mcd aligned to forecast horizon index; absent on older payloads.
+  // Prediction-interval band (μ ± n_std·σ_pred, σ_pred² = σ_MC² + σ_residual²).
+  // The realtime pipeline writes parallel arrays under analysis.mcd aligned to
+  // forecast horizon index; absent on older payloads.
   const mcd = latest.analysis?.mcd;
   const lowerArr = mcd?.lower ?? [];
   const upperArr = mcd?.upper ?? [];

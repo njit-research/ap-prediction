@@ -46,7 +46,7 @@ AP_DECIMALS = 1
 # Per-anchor forecast status recorded in the archives.
 IMPUTED_THRESHOLD = 0.05    # filled_fraction above this marks the run "imputed"
 STATUS_RANK = {"failed": 0, "imputed": 1, "ok": 2}
-DEFAULT_HORIZONS = 24       # forecast length used for a "failed" placeholder row
+DEFAULT_HORIZONS = 12       # forecast length used for a "failed" placeholder row (6 h)
 
 
 def _iso_now() -> str:
@@ -83,7 +83,8 @@ def _locate_event_csv(data: dict) -> Path | None:
     """Find the event CSV referenced by the forecast JSON.
 
     Prefers the absolute path recorded in `input.event_csv`, falls back to
-    `dataset/events/{anchor_stem}.csv` under vendor/realtime-regression-sw/.
+    `dataset/events/{anchor_stem}.csv` under the vendored engine dir
+    (vendor/realtime-regression-sw/).
     """
     recorded = data.get("input", {}).get("event_csv")
     if recorded:
@@ -254,7 +255,7 @@ def _update_forecast_csv(anchor_iso: str, values: list[float], status: str,
                          reason: str = "") -> None:
     """Upsert one anchor row into the 90-day wide-format CSV archive.
 
-    Columns: `anchor_timestamp_utc, status, m_30 … m_720` (ap30 per horizon lead
+    Columns: `anchor_timestamp_utc, status, m_30 … m_360` (ap30 per horizon lead
     time in minutes). Maintains a rolling `CSV_HISTORY_DAYS` grid. The current
     anchor row is written only when its status is the same or better than any
     existing row for that anchor (don't-downgrade). Never-produced anchors are
@@ -328,7 +329,7 @@ def _record_placeholder(reason: str) -> None:
 def _record_to_archives(data: dict | None, exit_code: int) -> None:
     """Record this run into both archives with a status (don't-downgrade).
 
-    On success the first-frame value, MCD interval, and full 24-step row are
+    On success the first-frame value, prediction interval, and full 12-step row are
     recorded as `ok`/`imputed`. On failure a `failed` placeholder is written for
     the current anchor (kept only if no better record exists for it).
     """

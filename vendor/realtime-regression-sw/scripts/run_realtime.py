@@ -235,10 +235,13 @@ def main() -> int:
             target_variable=target_var,
             num_samples=int(analysis_cfg.mcd.num_samples),
             n_std=float(analysis_cfg.mcd.n_std),
+            # σ_pred² = σ_MC² + σ_residual²; absent / 0 keeps the raw MC band.
+            noise_variance=float(analysis_cfg.mcd.get("noise_variance", 0.0) or 0.0),
         )
-        logger.info("MCD mean=[%.2f..%.2f], mean σ=%.3f",
+        logger.info("MCD mean=[%.2f..%.2f], mean σ_MC=%.3f, mean σ_pred=%.3f (noise var %.3f)",
                     mcd_result.mean.min(), mcd_result.mean.max(),
-                    float(mcd_result.std.mean()))
+                    float(mcd_result.mc_std.mean()), float(mcd_result.std.mean()),
+                    mcd_result.noise_variance)
 
     attn_result = None
     if analysis_cfg.attention.enable:
@@ -328,8 +331,10 @@ def main() -> int:
         analysis_meta["mcd"] = {
             "num_samples": int(len(mcd_result.samples)),
             "n_std": float(mcd_result.n_std),
+            "noise_variance": float(mcd_result.noise_variance),
             "mean": [float(v) for v in mcd_result.mean],
             "std": [float(v) for v in mcd_result.std],
+            "mc_std": [float(v) for v in mcd_result.mc_std],
             "lower": [float(v) for v in mcd_result.lower],
             "upper": [float(v) for v in mcd_result.upper],
         }

@@ -1,6 +1,7 @@
 # ap-prediction
 
-Public dashboard for 12-hour ap30 geomagnetic index forecasts.
+Public dashboard for 6-hour ap30 geomagnetic index forecasts with a 95%
+prediction interval.
 
 - Deployed site: https://sites.njit.edu/ap-prediction/
   (also at https://njit-research.github.io/ap-prediction/)
@@ -29,7 +30,7 @@ a checkout — no submodule, no GitHub Release download.
    the past-forecast archives (`forecast_history.json` / `.csv`).
 4. The `site/` directory is published as a GitHub Pages artifact.
 5. `site/index.html` fetches `data/latest.json` (+ `forecast_history.json`) on
-   load and renders a Chart.js plot of the 24-step (12-hour) ap30 forecast, the
+   load and renders a Chart.js plot of the 12-step (6-hour) ap30 forecast, the
    observed history, and the past-forecast line, with a `forecast_history.csv`
    download link.
 

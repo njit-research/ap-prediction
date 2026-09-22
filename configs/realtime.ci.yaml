@@ -1,17 +1,19 @@
 # CI runtime configuration for GitHub Actions runners.
 # Paths are relative to the vendor/realtime-regression-sw/ working directory.
-# Active profile: in12h_out12h_gnn_patchtst (12-hour input, 12-hour / 24-step
-# ap30 forecast). The workflow runs
-# `run_realtime.py --config ../../configs/realtime.ci.yaml`, then
+# Active profile: in6h_out6h_gnn_transformer (6-hour input, 6-hour / 12-step
+# ap30 forecast) -- the NJIT co-author's focal-loss + oversampling retrain of
+# the GNN-Transformer (checkpoint gnn_transformer_oversample_dup_2_4_8_best.pt,
+# delivered 2026-09-16, selected on the 2022-2025 validation split). The
+# workflow runs `run_realtime.py --config ../../configs/realtime.ci.yaml`, then
 # scripts/update_site_data.py copies results/predictions/* into site/data/.
 
 profile:
-  name: "in12h_out12h_gnn_patchtst"
-  io: "in12h_out12h"          # 12-hour input (24 steps), 12-hour output (24 steps)
-  model: "gnn_patchtst"       # GNN with PatchTST temporal backend
+  name: "in6h_out6h_gnn_transformer"
+  io: "in6h_out6h"            # 6-hour input (12 steps), 6-hour output (12 steps)
+  model: "gnn_transformer"    # GNN with Transformer temporal backend
 
 experiment:
-  name: "in12h_out12h_gnn_patchtst"
+  name: "in6h_out6h_gnn_transformer"
 
 paths:
   checkpoint: "./checkpoint/model_best.pth"
@@ -28,8 +30,8 @@ sources:
   max_retries: 3
 
 window:
-  lookback_steps: 24          # 12 hours × 2 steps/hour
-  forecast_steps: 24          # 12 hours × 2 steps/hour
+  lookback_steps: 12          # 6 hours × 2 steps/hour
+  forecast_steps: 12          # 6 hours × 2 steps/hour
   boundary_offset_minutes: 2
 
 runtime:
@@ -44,8 +46,12 @@ runtime:
     require_recent_steps_present: 0  # do not require the most recent steps to be real
     anchor_rollback_max_attempts: 2  # last-resort fallback if the current anchor is unfillable
 
-# MCD enabled so the site can render ±2σ uncertainty bands on the forecast.
-# Plot and attention artifacts are still skipped — the site only needs JSON.
+# Uncertainty band as in the DeepAP paper: a 95 % prediction interval
+# μ ± 1.96 σ_pred with σ_pred² = σ_MC² + σ_residual², where σ_MC is the
+# MC-dropout sample std and σ_residual² is the checkpoint's residual variance
+# on the 2022-2025 validation split (co-author's value for THIS checkpoint,
+# in ap30²). Re-measure it whenever the checkpoint changes; 0 gives the raw
+# MC band. Plot and attention artifacts are skipped — the site only needs JSON.
 analysis:
   plot:
     enable: false
@@ -54,13 +60,17 @@ analysis:
   mcd:
     enable: true
     num_samples: 100
-    n_std: 2.0
+    n_std: 1.96
+    noise_variance: 156.888489
   attention:
     enable: false
     save_npz: false
 
+# Co-author's stored metrics for this checkpoint (validation split 2022-2025,
+# raw ap30 units, deterministic pass): overall MAE 6.826, RMSE 12.85,
+# storm-rise (Δpeak ≥ 50) peak MAE 82.0; best epoch 11.
 model_provenance:
-  val_loss_at_train: 0.245454
-  val_mae_at_train: 0.3781     # ap30-specific MAE
-  val_rmse_at_train: 0.4956    # ap30-specific RMSE
-  trained_on_epoch: 9
+  val_loss_at_train: 0.0       # focal-loss value not stored in the co-author checkpoint
+  val_mae_at_train: 6.826      # raw ap30 MAE, 2022-2025 validation split
+  val_rmse_at_train: 12.85     # raw ap30 RMSE
+  trained_on_epoch: 11

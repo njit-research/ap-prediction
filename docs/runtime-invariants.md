@@ -7,10 +7,11 @@ forecasts or runtime errors. Read this before modifying inference code.
 ## 1. Input Tensor Shape
 
 The model receives exactly `(1, L, 22)`, where `L` is `window.lookback_steps`
-from `configs/realtime.ci.yaml` (24 for the active `in12h` profile):
+from `configs/realtime.ci.yaml` (12 for the active `in6h_out6h_gnn_transformer`
+profile; it was 24 under the previous `in12h` profile):
 
 - **1** — batch size (single live sample).
-- **L** — 30-min steps of input history (24 = 12 hours for `in12h`).
+- **L** — 30-min steps of input history (12 = 6 hours for `in6h`).
 - **22** — 21 solar-wind parameters + `ap30`, in the exact order of
   `input_variables` in
   `vendor/realtime-regression-sw/configs/profile/base.yaml`.

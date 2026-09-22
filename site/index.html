@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ap30 Forecast</title>
-<meta name="description" content="12-hour ap30 geomagnetic index forecast, updated every 30 minutes.">
+<meta name="description" content="6-hour ap30 geomagnetic index forecast with a 95% prediction interval, updated every 30 minutes.">
 
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
@@ -72,7 +72,7 @@
 
   <header>
     <h1>ap30 Forecast</h1>
-    <p>12-hour ap30 forecast from <code>realtime-regression-sw</code>, updated every 30 minutes.</p>
+    <p>6-hour ap30 forecast from <code>realtime-regression-sw</code> (GNN-Transformer, focal-loss retrain), updated every 30 minutes. Shaded band: 95% prediction interval, μ ± 1.96 σ with σ² = σ<sub>MC</sub>² + σ<sub>residual</sub>².</p>
   </header>
 
   <div id="status-banner" class="status-banner"></div>

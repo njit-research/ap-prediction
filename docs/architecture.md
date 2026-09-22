@@ -8,7 +8,7 @@ public page is served at `https://sites.njit.edu/ap-prediction/`.
 
 ## 1. Overview
 
-`ap-prediction` publishes a live 12-hour ap30 geomagnetic-index forecast chart
+`ap-prediction` publishes a live 6-hour ap30 geomagnetic-index forecast chart
 at `https://sites.njit.edu/ap-prediction/`. A GitHub Actions cron re-runs the
 inference pipeline every 10 minutes (three attempts per 30-min anchor), writes a
 fresh `latest.json`, and deploys the updated static site to GitHub Pages.
@@ -81,10 +81,10 @@ Every 30 minutes, one full cycle from upstream feed to browser happens:
                 │  1. Fetch the three HTTP feeds (requests + retry)   │
                 │  2. Aggregate 1-min → 30-min bins                   │
                 │  3. Compute anchor t_end = floor(now - 2min, 30min) │
-                │  4. Build the 24-row × 22-col event window          │
+                │  4. Build the 12-row × 22-col event window          │
                 │  5. Normalize with table_stats.pkl                  │
                 │  6. Run model_best.pth (CPU, ~100ms)                │
-                │  7. Denormalize, emit forecast 24 steps × ap30      │
+                │  7. Denormalize, emit forecast 12 steps × ap30 + PI │
                 │  8. Write JSON + CSV to results/{YYYYMMDD}/         │
                 └──────────────────────┬──────────────────────────────┘
                                        │
@@ -113,7 +113,7 @@ Every 30 minutes, one full cycle from upstream feed to browser happens:
                 │  1. fetch latest.json + status.json (no-store)      │
                 │  2. Populate metadata; paint status banner          │
                 │  3. Render Chart.js: red observed history,          │
-                │     blue forecast + MCD uncertainty band,           │
+                │     blue forecast + 95% prediction interval,        │
                 │     vertical "now" divider (full height)            │
                 │  4. x-axis tick labels formatted in UTC             │
                 └─────────────────────────────────────────────────────┘
@@ -145,13 +145,19 @@ code 2 (`InsufficientDataError`).
 
 ### 3.3 Model I/O shape
 
-The active profile is `in12h_out12h_gnn_patchtst`: a GNN spatial encoder with a
-PatchTST temporal backbone, a 12-hour input window, and a 12-hour forecast.
+The active profile is `in6h_out6h_gnn_transformer`: a GNN spatial encoder with a
+Transformer temporal backbone, trained with a focal Huber loss and storm-rise
+oversampling, a 6-hour input window, and a 6-hour forecast. The uncertainty
+band is the 95 % prediction interval μ ± 1.96 σ_pred with
+σ_pred² = σ_MC² + σ_residual² (Monte Carlo dropout variance plus the
+checkpoint's validation residual variance, `analysis.mcd.noise_variance` in
+`configs/realtime.ci.yaml`; that value belongs to the checkpoint and must be
+re-measured when the checkpoint changes).
 
 | Tensor | Shape | Description |
 |--------|-------|-------------|
-| Input  | `(1, 24, 22)` | 1 batch × 24 timesteps (12 hours × 30-min) × 22 vars |
-| Output | `(1, 24, 1)`  | 1 batch × 24 timesteps (12 hours × 30-min) × 1 var (ap30) |
+| Input  | `(1, 12, 22)` | 1 batch × 12 timesteps (6 hours × 30-min) × 22 vars |
+| Output | `(1, 12, 1)`  | 1 batch × 12 timesteps (6 hours × 30-min) × 1 var (ap30) |
 
 22 input variables: 21 solar-wind parameters (v/np/t ×avg/min/max,
 Bx/By/Bz/Bt ×avg/min/max) + ap30.
@@ -405,12 +411,12 @@ agnostic to which of these hosts it is served from.
   "run_timestamp_utc":    "2026-05-08T01:30:07Z",
   "anchor_timestamp_utc": "2026-05-08T01:30:00Z",
   "model": {
-    "profile":          "in12h_out12h_gnn_patchtst",
+    "profile":          "in6h_out6h_gnn_transformer",
     "checkpoint_path":  "checkpoint/model_best.pth",
-    "checkpoint_sha256":"c9be5e1b8fac...",
-    "val_loss_at_train": 0.245454,
-    "val_mae_at_train":  0.3781,
-    "val_rmse_at_train": 0.4956
+    "checkpoint_sha256":"...",
+    "val_loss_at_train": 0.0,
+    "val_mae_at_train":  6.826,                // raw ap30, 2022-2025 validation split
+    "val_rmse_at_train": 12.85
   },
   "input": {
     "event_csv": "/.../dataset/events/20260508013000.csv",
@@ -421,14 +427,16 @@ agnostic to which of these hosts it is served from.
     },
     "missing_data_filled_fraction": 0.017
   },
-  "forecast": [                                // 24 entries = 12 hours
+  "forecast": [                                // 12 entries = 6 hours
     {"horizon_steps":1, "horizon_minutes":30, "target_timestamp_utc":"...", "ap30":7.2},
     ...
   ],
-  "analysis": {                                // Monte Carlo Dropout uncertainty
+  "analysis": {                                // prediction interval
     "mcd": {
-      "mean":  [...], "std": [...],
-      "lower": [...], "upper": [...]           // aligned to forecast horizon index
+      "n_std": 1.96, "noise_variance": 156.888489,
+      "mean":  [...], "mc_std": [...],         // MC-dropout mean and sample std
+      "std":   [...],                          // sqrt(mc_std^2 + noise_variance)
+      "lower": [...], "upper": [...]           // mean -/+ n_std * std, aligned to horizon index
     }
   },
   "history": [                                 // recent observed ap30 (added by update_site_data.py)
@@ -439,8 +447,8 @@ agnostic to which of these hosts it is served from.
 ```
 
 `update_site_data.py` embeds up to `HISTORY_STEPS` (96, i.e. 48 hours) of
-observed ap30 rows from the event window; with the current 12-hour input profile
-the event window provides 24 steps.
+observed ap30 rows from the event window; with the current 6-hour input profile
+the event window provides 12 steps.
 
 ### 7.2 `status.json` schema
 
