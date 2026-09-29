@@ -676,6 +676,6 @@
     "ap30": 2.0,
     "lower": 0.0,
     "upper": 26.6,
-    "status": "imputed"
+    "status": "ok"
   }
 ]
