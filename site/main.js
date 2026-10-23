@@ -254,6 +254,7 @@
         },
         y: {
           beginAtZero: true,
+          suggestedMax: 50,   // top of the axis at least 50; grows with larger values
           title: { display: true, text: "ap30" },
         },
       },
